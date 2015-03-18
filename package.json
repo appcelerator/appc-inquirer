@@ -32,7 +32,8 @@
   "devDependencies": {
     "grunt-cli": "^0.1.13",
     "grunt-appc-js": "*",
-    "grunt-kahvesi": "0.2.0-dev2",
+    "grunt-kahvesi": "^0.2.0",
+    "grunt-appc-coverage": "^0.2.0",
     "grunt-mocha-test": "^0.12.1",
     "lodash": "^3.1.0",
     "should": "^4.0.4"

@@ -18,16 +18,23 @@ module.exports = function(grunt) {
 			},
 			src: ['interrogate.js', 'test/**/*.js']
 		},
-		kahvesi: { src: tests }
+		kahvesi: { src: tests },
+		appcCoverage: {
+			default_options: {
+				src: 'coverage/lcov.info',
+				force: true
+			}
+		}
 	});
 
 	// Load grunt plugins for modules
 	grunt.loadNpmTasks('grunt-mocha-test');
 	grunt.loadNpmTasks('grunt-appc-js');
 	grunt.loadNpmTasks('grunt-kahvesi');
+	grunt.loadNpmTasks('grunt-appc-coverage');
 
 	// register tasks
-	grunt.registerTask('cover', ['kahvesi']);
+	grunt.registerTask('cover', ['kahvesi', 'appcCoverage']);
 	grunt.registerTask('default', ['appcJs', 'mochaTest']);
 
 };
