@@ -59,7 +59,7 @@ timestamps {
           }
 
           if (updateJIRATickets) {
-            updateJIRA('API', packageVersion, scm)
+            updateJIRA('CLI', packageVersion, scm)
           }
         }
       } // ansiColor
