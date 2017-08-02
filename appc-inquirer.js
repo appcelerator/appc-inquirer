@@ -4,10 +4,20 @@ var async = require('async'),
 
 module.exports = new AppcInquirer();
 
+/**
+ *
+ * @constructor
+ */
 function AppcInquirer() {}
 
+/**
+ *
+ * @param  {Array}   questions [description]
+ * @param  {Object}   opts      [description]
+ * @param  {Function} callback  [description]
+ */
 AppcInquirer.prototype.prompt = function prompt(questions, opts, callback) {
-	callback = arguments[arguments.length-1];
+	callback = arguments[arguments.length - 1];
 	if (!opts || isFunction(opts)) { opts = {}; }
 
 	// ask our questions over a socket
@@ -18,26 +28,36 @@ AppcInquirer.prototype.prompt = function prompt(questions, opts, callback) {
 	// have inquirer handle questions via stdio
 	else {
 		var promise = inquirer.prompt(questions);
-		promise.then(function(answers) {
+		promise.then(function (answers) {
 			// inquirer filters answers from the parameter for questions that where
 			// not actually asked due to ther when function returning false. But we
 			// can still get the unfiltered answers directly from the ui reference
 			// set on the promise.
 			return callback(null, promise.ui.answers);
-		}).catch(function(error) {
+		}).catch(function (error) {
 			return callback(error);
 		});
 		return promise.ui;
 	}
 };
 
+/**
+ *
+ * @param       {Object} opts [description]
+ * @constructor
+ */
 function SocketPrompt(opts) {
 	this.host = opts.host || '127.0.0.1';
 	this.port = opts.port || 22212;
 	this.bundle = opts.bundle || false;
 }
 
-SocketPrompt.prototype.prompt = function(questions, callback) {
+/**
+ * [description]
+ * @param  {Array}   questions [description]
+ * @param  {Function} callback  [description]
+ */
+SocketPrompt.prototype.prompt = function (questions, callback) {
 	questions = !Array.isArray(questions) ? [questions] : questions;
 
 	var self = this;
@@ -46,7 +66,7 @@ SocketPrompt.prototype.prompt = function(questions, callback) {
 	async.waterfall([
 
 		// set up handlers for socket
-		function(cb) {
+		function (cb) {
 			client.on('connect', cb);
 			client.on('error', callback);
 
@@ -57,23 +77,29 @@ SocketPrompt.prototype.prompt = function(questions, callback) {
 		},
 
 		// send question, receive answer
-		function(cb) {
+		function (cb) {
 			if (self.bundle) {
 				return bundleQuestions(client, questions, cb);
 			} else {
 				return singleQuestions(client, questions, cb);
 			}
 		}
-	], function(err, answers) {
+	], function (err, answers) {
 		client.end();
 		return callback(err, answers);
 	});
 };
 
+/**
+ * [singleQuestions description]
+ * @param  {net.Socket}   client    [description]
+ * @param  {Array}   questions [description]
+ * @param  {Function} callback  [description]
+ */
 function singleQuestions(client, questions, callback) {
 	var answers = {};
 
-	async.eachSeries(questions, function(q, done) {
+	async.eachSeries(questions, function (q, done) {
 		// when
 		if (isFunction(q.when) && !q.when(answers)) { return done(); }
 
@@ -88,8 +114,11 @@ function singleQuestions(client, questions, callback) {
 			question: q
 		}));
 
+		/**
+		 * [waitForResponse description]
+		 */
 		function waitForResponse() {
-			client.once('data', function(answer) {
+			client.once('data', function (answer) {
 				// make sure we got JSON back
 				try {
 					answer = JSON.parse(answer);
@@ -108,7 +137,7 @@ function singleQuestions(client, questions, callback) {
 					if (valid !== true) {
 						client.write(JSON.stringify({
 							type: 'error',
-							message: 'validate error: ' + (valid || 'invalid value for ' + q.name ),
+							message: 'validate error: ' + (valid || 'invalid value for ' + q.name),
 							question: q
 						}));
 						return waitForResponse();
@@ -127,30 +156,34 @@ function singleQuestions(client, questions, callback) {
 		}
 
 		return waitForResponse();
-	}, function(err) {
+	}, function (err) {
 		return callback(err, answers);
 	});
 }
 
+/**
+ * [bundleQuestions description]
+ * @param  {net.Socket}   client    [description]
+ * @param  {Array}   questions [description]
+ * @param  {Function} callback  [description]
+ */
 function bundleQuestions(client, questions, callback) {
 	var answers = {},
 		bundles = [];
 
 	// create question bundles
-	questions.forEach(function(q, index) {
-		if (isFunction(q.when) || isFunction(q.message) || isFunction(q.default) ||
-			isFunction(q.choices) || index === 0)
-		{
+	questions.forEach(function (q, index) {
+		if (isFunction(q.when) || isFunction(q.message) || isFunction(q.default) || isFunction(q.choices) || index === 0) {
 			bundles[bundles.length] = [q];
 		} else {
-			bundles[bundles.length-1].push(q);
+			bundles[bundles.length - 1].push(q);
 		}
 	});
 
 	// process each question bundle over socket
-	async.eachSeries(bundles, function(bundle, done) {
+	async.eachSeries(bundles, function (bundle, done) {
 		var reqBundle = [];
-		bundle.forEach(function(q) {
+		bundle.forEach(function (q) {
 			// when
 			if (isFunction(q.when) && !q.when(answers)) { return; }
 
@@ -171,8 +204,11 @@ function bundleQuestions(client, questions, callback) {
 			question: reqBundle
 		}));
 
+		/**
+		 * [waitForResponse description]
+		 */
 		function waitForResponse() {
-			client.once('data', function(respAnswers) {
+			client.once('data', function (respAnswers) {
 				// make sure we got JSON back
 				try {
 					respAnswers = JSON.parse(respAnswers);
@@ -198,7 +234,7 @@ function bundleQuestions(client, questions, callback) {
 						if (valid !== true) {
 							client.write(JSON.stringify({
 								type: 'error',
-								message: 'validate error: ' + (valid || 'invalid value for ' + q.name ),
+								message: 'validate error: ' + (valid || 'invalid value for ' + q.name),
 								question: reqBundle
 							}));
 							return waitForResponse();
@@ -219,25 +255,18 @@ function bundleQuestions(client, questions, callback) {
 		}
 
 		return waitForResponse();
-	}, function(err) {
+	}, function (err) {
 		return callback(err, answers);
 	});
 }
 
-function processResponse(resp) {
-	// make sure we got JSON back
-	try {
-		answer = JSON.parse(answer);
-	} catch (e) {
-		client.write(JSON.stringify({
-			type: 'error',
-			message: 'parse error: ' + e.message,
-			question: q
-		}));
-		return waitForResponse();
-	}
-}
-
+/**
+ * Searches an array for a matching key/value pair. Returns the array item that matches.
+ * @param  {Array} array array of items to search
+ * @param  {Object} key   property of each array item to check
+ * @param  {Object} value expected value
+ * @return {Object}       the array item whose property(`key`) has the value (`value`)
+ */
 function find(array, key, value) {
 	for (var i = 0; i < array.length; i++) {
 		var item = array[i];
@@ -246,6 +275,11 @@ function find(array, key, value) {
 	return null;
 }
 
+/**
+ * [isFunction description]
+ * @param  {Object}  o [description]
+ * @return {boolean}   [description]
+ */
 function isFunction(o) {
 	return o && Object.prototype.toString.call(o) === '[object Function]';
 }

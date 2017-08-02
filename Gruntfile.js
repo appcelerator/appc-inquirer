@@ -1,33 +1,36 @@
 module.exports = function(grunt) {
 
-	var tests = ['test/**/*_test.js'];
-
 	// Project configuration.
 	grunt.initConfig({
-		mochaTest: {
-			options: {
-				timeout: 3000,
-				reporter: 'spec',
-				ignoreLeaks: false
-			},
-			src: tests
+		mocha_istanbul: {
+			coverage: {
+				src: 'test',
+				options: {
+					ignoreLeaks: false,
+					check: {
+						statements: 80,
+						branches: 80,
+						functions: 80,
+						lines: 80
+					},
+					reporter: 'mocha-jenkins-reporter',
+					reportFormats: ['lcov', 'cobertura']
+				}
+			}
 		},
 		appcJs: {
 			options: {
 				force: false
 			},
-			src: ['interrogate.js', 'test/**/*.js']
-		},
-		kahvesi: { src: tests }
+			src: ['appc-inquirer.js', 'test/**/*.js']
+		}
 	});
 
 	// Load grunt plugins for modules
-	grunt.loadNpmTasks('grunt-mocha-test');
 	grunt.loadNpmTasks('grunt-appc-js');
-	grunt.loadNpmTasks('grunt-kahvesi');
+	grunt.loadNpmTasks('grunt-mocha-istanbul');
 
 	// register tasks
-	grunt.registerTask('cover', ['kahvesi']);
-	grunt.registerTask('default', ['appcJs', 'mochaTest']);
+	grunt.registerTask('default', ['appcJs', 'mocha_istanbul:coverage']);
 
 };

@@ -3,3 +3,4 @@ npm-debug.log
 coverage
 cover
 build.log
+junit_report.xml
