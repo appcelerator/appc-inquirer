@@ -44,6 +44,15 @@ AppcInquirer.prototype.prompt = function prompt(questions, opts, callback) {
 };
 
 /**
+ * Send message from CLI to Studio.
+ * @param  {Object}   opts      [description]
+ * @param  {Function} callback  [description]
+ */
+AppcInquirer.prototype.socketMessage = function (opts, callback) {
+	return new SocketPrompt(opts).sendMessage(opts, callback);
+};
+
+/**
  *
  * @param       {Object} opts [description]
  * @constructor
@@ -52,6 +61,7 @@ function SocketPrompt(opts) {
 	this.host = opts.host || '127.0.0.1';
 	this.port = opts.port || 22212;
 	this.bundle = opts.bundle || false;
+	this.message = opts.message || '';
 }
 
 /**
@@ -81,9 +91,9 @@ SocketPrompt.prototype.prompt = function (questions, callback) {
 		// send question, receive answer
 		function (cb) {
 			if (self.bundle) {
-				return bundleQuestions(client, questions, cb);
+				return bundleQuestions(client, questions, self, cb);
 			} else {
-				return singleQuestions(client, questions, cb);
+				return singleQuestions(client, questions, self, cb);
 			}
 		}
 	], function (err, answers) {
@@ -93,12 +103,45 @@ SocketPrompt.prototype.prompt = function (questions, callback) {
 };
 
 /**
+ * Send message through socket, mainly used by Studio.
+ * @param  {Object}   opts [description]
+ * @param  {Function} callback  [description]
+ */
+SocketPrompt.prototype.sendMessage = function (opts, callback) {
+	var self = this;
+	var client = new net.Socket();
+
+	async.waterfall([
+		function (cb) {
+			client.on('connect', cb);
+			client.on('error', callback);
+
+			client.connect({
+				host: self.host,
+				port: self.port
+			});
+		},
+
+		function (cb) {
+			client.write(JSON.stringify({
+				type: opts.type,
+				message: opts.msg
+			}), cb);
+		}
+	], function (err, result) {
+		client.end();
+		return callback(err, result);
+	});
+};
+
+/**
  * [singleQuestions description]
  * @param  {net.Socket}   client    [description]
  * @param  {Array}   questions [description]
+ * @param  {Object}   context [description]
  * @param  {Function} callback  [description]
  */
-function singleQuestions(client, questions, callback) {
+function singleQuestions(client, questions, context, callback) {
 	var answers = {};
 
 	async.eachSeries(questions, function (q, done) {
@@ -121,7 +164,8 @@ function singleQuestions(client, questions, callback) {
 		// send question over socket
 		client.write(JSON.stringify({
 			type: 'question',
-			question: q
+			question: q,
+			message: context.message
 		}));
 
 		/**
@@ -175,9 +219,10 @@ function singleQuestions(client, questions, callback) {
  * [bundleQuestions description]
  * @param  {net.Socket}   client    [description]
  * @param  {Array}   questions [description]
+ * @param  {Object}   context [description]
  * @param  {Function} callback  [description]
  */
-function bundleQuestions(client, questions, callback) {
+function bundleQuestions(client, questions, context, callback) {
 	var answers = {},
 		bundles = [];
 
@@ -221,7 +266,8 @@ function bundleQuestions(client, questions, callback) {
 		// send question over socket
 		client.write(JSON.stringify({
 			type: 'question',
-			question: reqBundle
+			question: reqBundle,
+			message: context.message
 		}));
 
 		/**
