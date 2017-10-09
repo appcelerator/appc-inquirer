@@ -62,6 +62,7 @@ function SocketPrompt(opts) {
 	this.port = opts.port || 22212;
 	this.bundle = opts.bundle || false;
 	this.message = opts.message || '';
+	this.code = opts.code || '';
 }
 
 /**
@@ -91,9 +92,9 @@ SocketPrompt.prototype.prompt = function (questions, callback) {
 		// send question, receive answer
 		function (cb) {
 			if (self.bundle) {
-				return bundleQuestions(client, questions, self, cb);
+				return bundleQuestions(client, questions, cb);
 			} else {
-				return singleQuestions(client, questions, self, cb);
+				return singleQuestions(client, questions, cb);
 			}
 		}
 	], function (err, answers) {
@@ -125,6 +126,7 @@ SocketPrompt.prototype.sendMessage = function (opts, callback) {
 		function (cb) {
 			client.write(JSON.stringify({
 				type: opts.type,
+				code: opts.code,
 				message: opts.msg
 			}), cb);
 		}
@@ -141,7 +143,7 @@ SocketPrompt.prototype.sendMessage = function (opts, callback) {
  * @param  {Object}   context [description]
  * @param  {Function} callback  [description]
  */
-function singleQuestions(client, questions, context, callback) {
+function singleQuestions(client, questions, callback) {
 	var answers = {};
 
 	async.eachSeries(questions, function (q, done) {
@@ -164,52 +166,44 @@ function singleQuestions(client, questions, context, callback) {
 		// send question over socket
 		client.write(JSON.stringify({
 			type: 'question',
-			question: q,
-			message: context.message
+			question: q
 		}));
 
-		/**
-		 * [waitForResponse description]
-		 */
-		function waitForResponse() {
-			client.once('data', function (answer) {
-				// make sure we got JSON back
-				try {
-					answer = JSON.parse(answer);
-				} catch (e) {
+		client.once('data', function (answer) {
+			// make sure we got JSON back
+			try {
+				answer = JSON.parse(answer);
+			} catch (e) {
+				client.write(JSON.stringify({
+					type: 'error',
+					code: 'ERROR_PARSE',
+					message: 'parse error: ' + e.message
+				}));
+				return done(new Error('Parse error.'));
+			}
+
+			// validate the answer
+			if (isFunction(q.validate)) {
+				var valid = q.validate(answer);
+				if (valid !== true) {
 					client.write(JSON.stringify({
 						type: 'error',
-						message: 'parse error: ' + e.message,
-						question: q
+						code: 'ERROR_VALIDATE',
+						message: 'validate error: ' + (valid || 'invalid value for ' + q.name)
 					}));
-					return waitForResponse();
+					return done(new Error('Validate error.'));
 				}
+			}
 
-				// validate the answer
-				if (isFunction(q.validate)) {
-					var valid = q.validate(answer);
-					if (valid !== true) {
-						client.write(JSON.stringify({
-							type: 'error',
-							message: 'validate error: ' + (valid || 'invalid value for ' + q.name),
-							question: q
-						}));
-						return waitForResponse();
-					}
-				}
+			// filter
+			if (isFunction(q.filter)) {
+				answer = q.filter(answer);
+			}
 
-				// filter
-				if (isFunction(q.filter)) {
-					answer = q.filter(answer);
-				}
-
-				// save answer
-				answers[q.name] = answer;
-				return done();
-			});
-		}
-
-		return waitForResponse();
+			// save answer
+			answers[q.name] = answer;
+			return done();
+		});
 	}, function (err) {
 		return callback(err, answers);
 	});
@@ -222,7 +216,7 @@ function singleQuestions(client, questions, context, callback) {
  * @param  {Object}   context [description]
  * @param  {Function} callback  [description]
  */
-function bundleQuestions(client, questions, context, callback) {
+function bundleQuestions(client, questions, callback) {
 	var answers = {},
 		bundles = [];
 
@@ -266,61 +260,53 @@ function bundleQuestions(client, questions, context, callback) {
 		// send question over socket
 		client.write(JSON.stringify({
 			type: 'question',
-			question: reqBundle,
-			message: context.message
+			question: reqBundle
 		}));
 
-		/**
-		 * [waitForResponse description]
-		 */
-		function waitForResponse() {
-			client.once('data', function (respAnswers) {
-				// make sure we got JSON back
-				try {
-					respAnswers = JSON.parse(respAnswers);
-				} catch (e) {
-					client.write(JSON.stringify({
-						type: 'error',
-						message: 'parse error: ' + e.message,
-						question: reqBundle
-					}));
-					return waitForResponse();
+		client.once('data', function (respAnswers) {
+			// make sure we got JSON back
+			try {
+				respAnswers = JSON.parse(respAnswers);
+			} catch (e) {
+				client.write(JSON.stringify({
+					type: 'error',
+					code: 'ERROR_PARSE',
+					message: 'parse error: ' + e.message
+				}));
+				return done(new Error('Parse error.'));
+			}
+
+			// validate the answer
+			var keys = Object.keys(respAnswers);
+			for (var i = 0; i < keys.length; i++) {
+				var key = keys[i];
+				var q = find(reqBundle, 'name', key);
+				var answer = respAnswers[key];
+
+				// validate the current answer
+				if (isFunction(q.validate)) {
+					var valid = q.validate(answer);
+					if (valid !== true) {
+						client.write(JSON.stringify({
+							type: 'error',
+							code: 'ERROR_VALIDATE',
+							message: 'validate error: ' + (valid || 'invalid value for ' + q.name)
+						}));
+						return done(new Error('Validate error.'));
+					}
 				}
 
-				// validate the answer
-				var keys = Object.keys(respAnswers);
-				for (var i = 0; i < keys.length; i++) {
-					var key = keys[i];
-					var q = find(reqBundle, 'name', key);
-					var answer = respAnswers[key];
-
-					// validate the current answer
-					if (isFunction(q.validate)) {
-						var valid = q.validate(answer);
-						if (valid !== true) {
-							client.write(JSON.stringify({
-								type: 'error',
-								message: 'validate error: ' + (valid || 'invalid value for ' + q.name),
-								question: reqBundle
-							}));
-							return waitForResponse();
-						}
-					}
-
-					// filter the answer
-					if (isFunction(q.filter)) {
-						answer = q.filter(answer);
-					}
-
-					// save the answer
-					answers[key] = answer;
+				// filter the answer
+				if (isFunction(q.filter)) {
+					answer = q.filter(answer);
 				}
 
-				return done();
-			});
-		}
+				// save the answer
+				answers[key] = answer;
+			}
 
-		return waitForResponse();
+			return done();
+		});
 	}, function (err) {
 		return callback(err, answers);
 	});

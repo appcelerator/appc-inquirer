@@ -305,7 +305,7 @@ describe('appc-inquirer', function () {
 		});
 	});
 
-	it('resends question when it receives bad response JSON', function (done) {
+	it('response parse error when it receives bad response JSON', function (done) {
 		var val = 'workit';
 
 		var server = net.createServer(function (c) {
@@ -331,26 +331,20 @@ describe('appc-inquirer', function () {
 					}).should.not.throw();
 					data.should.be.an.Object;
 					data.type.should.equal('error');
+					data.code.should.equal('parse error');
 					data.message.should.match(/parse error/);
-					data.question.should.be.an.Object;
-					data.question.should.have.properties(BASIC);
-
-					// send good JSON this time
-					c.write(JSON.stringify(val));
 				});
 			});
 		});
 		server.listen(DEFAULT_PORT, function () {
-			inquirer.prompt(BASIC, { socket: true }, function (err, answers) {
-				should.not.exist(err);
-				answers.should.be.an.Object;
-				answers.basic.should.equal(val);
+			inquirer.prompt(BASIC, { socket:true }, function (err, answers) {
+				should.exist(err);
 				return done();
 			});
 		});
 	});
 
-	it('resends question when it receives bad response JSON (socket-bundle)', function (done) {
+	it('response parse error when it receives bad response JSON (socket-bundle)', function (done) {
 		var val = 'workit';
 
 		var server = net.createServer(function (c) {
@@ -377,27 +371,18 @@ describe('appc-inquirer', function () {
 					data.should.be.an.Object;
 					data.type.should.equal('error');
 					data.message.should.match(/parse error/);
-					data.question.should.be.an.Array;
-					data.question[0].should.have.properties(BASIC);
-
-					// send good JSON this time
-					var result = {};
-					result[data.question[0].name] = val;
-					c.write(JSON.stringify(result));
 				});
 			});
 		});
 		server.listen(DEFAULT_PORT, function () {
-			inquirer.prompt(BASIC, { socket: true, bundle: true }, function (err, answers) {
-				should.not.exist(err);
-				answers.should.be.an.Object;
-				answers.basic.should.equal(val);
+			inquirer.prompt(BASIC, { socket:true, bundle:true }, function (err, answers) {
+				should.exist(err);
 				return done();
 			});
 		});
 	});
 
-	it('resends question when answer fails validation (default message)', function (done) {
+	it('response validate error when answer fails validation (default message)', function (done) {
 		var val = 'workit',
 			question = _.clone(BASIC);
 		question.validate = function (answer) {
@@ -428,25 +413,18 @@ describe('appc-inquirer', function () {
 					data.should.be.an.Object;
 					data.type.should.equal('error');
 					data.message.should.match(/validate error/);
-					data.question.should.be.an.Object;
-					data.question.should.have.properties(_.omit(question, OMIT_PROPS));
-
-					// send good JSON this time
-					c.write(JSON.stringify(val));
 				});
 			});
 		});
 		server.listen(DEFAULT_PORT, function () {
-			inquirer.prompt(question, { socket: true }, function (err, answers) {
-				should.not.exist(err);
-				answers.should.be.an.Object;
-				answers.basic.should.equal(val);
+			inquirer.prompt(question, { socket:true }, function (err, answers) {
+				should.exist(err);
 				return done();
 			});
 		});
 	});
 
-	it('resends question when answer fails validation socket-bundle (default message)', function (done) {
+	it('response validate error when answer fails validation socket-bundle (default message)', function (done) {
 		var val = 'workit',
 			question = _.clone(BASIC);
 		question.validate = function (answer) {
@@ -479,21 +457,12 @@ describe('appc-inquirer', function () {
 					data.should.be.an.Object;
 					data.type.should.equal('error');
 					data.message.should.match(/validate error/);
-					data.question.should.be.an.Array;
-					data.question[0].should.have.properties(_.omit(question, OMIT_PROPS));
-
-					// send good JSON this time
-					result = {};
-					result[data.question[0].name] = val;
-					c.write(JSON.stringify(result));
 				});
 			});
 		});
 		server.listen(DEFAULT_PORT, function () {
-			inquirer.prompt(question, { socket: true, bundle: true }, function (err, answers) {
-				should.not.exist(err);
-				answers.should.be.an.Object;
-				answers.basic.should.equal(val);
+			inquirer.prompt(question, { socket:true, bundle:true }, function (err, answers) {
+				should.exist(err);
 				return done();
 			});
 		});
@@ -593,14 +562,8 @@ describe('appc-inquirer', function () {
 		});
 
 		server.listen(9374, function () {
-			inquirer.prompt(questions, { socket: true, port: 9374 }, function (err, answers) {
-				should.not.exist(err);
-				answers.should.be.an.Object;
-				answers.q1.should.equal('answer#1');
-				answers.q2.should.equal('answer2');
-				answers.q3.should.eql([ 'v1', 'v3' ]);
-				answers.q4.should.equal(val);
-				answers.q5.should.be.true;
+			inquirer.prompt(questions, { socket:true, port:9374 }, function (err, answers) {
+				should.exist(err);
 				server.close();
 				return done();
 			});
@@ -708,14 +671,8 @@ describe('appc-inquirer', function () {
 		});
 
 		server.listen(9374, function () {
-			inquirer.prompt(questions, { socket: true, port: 9374, bundle: true }, function (err, answers) {
-				should.not.exist(err);
-				answers.should.be.an.Object;
-				answers.q1.should.equal('answer#1');
-				answers.q2.should.equal('answer2');
-				answers.q3.should.eql([ 'v1', 'v3' ]);
-				answers.q4.should.equal(val);
-				answers.q5.should.be.true;
+			inquirer.prompt(questions, { socket:true, port:9374, bundle:true }, function (err, answers) {
+				should.exist(err);
 				server.close();
 				return done();
 			});
