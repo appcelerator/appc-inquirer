@@ -119,7 +119,7 @@ SocketPrompt.prototype.sendMessage = function (opts, callback) {
 
 			client.connect({
 				host: self.host,
-				port: self.port
+				port: opts.port
 			});
 		},
 
