@@ -68,6 +68,34 @@ describe('appc-inquirer', function () {
 		}, 200);
 	});
 
+	it('send message via socket', function (done) {
+		var opts = {
+			port: DEFAULT_PORT,
+			type: 'error',
+			code: 'ERROR_CODE',
+			message: 'test message'
+		};
+
+		var server = net.createServer(function (c) {
+			c.once('data', function (data) {
+				server.close();
+				(function () {
+					data = JSON.parse(data.toString());
+				}).should.not.throw();
+				data.should.be.an.Object;
+				data.type.should.equal('error');
+				data.code.should.equal('ERROR_CODE');
+				data.message.should.equal('test message');
+			});
+		});
+		server.listen(DEFAULT_PORT, function () {
+			inquirer.socketMessage(opts, function (err, answers) {
+				should.not.exist(err);
+				return done();
+			});
+		});
+	});
+
 	it('gets user input via socket', function (done) {
 		var val = 'workit';
 
