@@ -1,3 +1,5 @@
+'use strict';
+
 var async = require('async'),
 	inquirer = require('inquirer'),
 	net = require('net');
@@ -15,22 +17,22 @@ function AppcInquirer() {}
  * @param  {Array}   questions [description]
  * @param  {Object}   opts      [description]
  * @param  {Function} callback  [description]
+ * @returns {void}
  */
 AppcInquirer.prototype.prompt = function prompt(questions, opts, callback) {
 	callback = arguments[arguments.length - 1];
-	if (!opts || isFunction(opts)) { opts = {}; }
+	if (!opts || isFunction(opts)) {
+		opts = {};
+	}
 
 	// ask our questions over a socket
 	if (opts.socket) {
 		return new SocketPrompt(opts).prompt(questions, callback);
-	}
-
-	// have inquirer handle questions via stdio
-	else {
+	} else { // have inquirer handle questions via stdio
 		var promise = inquirer.prompt(questions);
 		promise.then(function (answers) {
 			// inquirer filters answers from the parameter for questions that where
-			// not actually asked due to ther when function returning false. But we
+			// not actually asked due to their when function returning false. But we
 			// can still get the unfiltered answers directly from the ui reference
 			// set on the promise.
 			return callback(null, promise.ui.answers);
@@ -58,7 +60,7 @@ function SocketPrompt(opts) {
  * @param  {Function} callback  [description]
  */
 SocketPrompt.prototype.prompt = function (questions, callback) {
-	questions = !Array.isArray(questions) ? [questions] : questions;
+	questions = !Array.isArray(questions) ? [ questions ] : questions;
 
 	var self = this;
 	var client = new net.Socket();
@@ -101,12 +103,20 @@ function singleQuestions(client, questions, callback) {
 
 	async.eachSeries(questions, function (q, done) {
 		// when
-		if (isFunction(q.when) && !q.when(answers)) { return done(); }
+		if (isFunction(q.when) && !q.when(answers)) {
+			return done();
+		}
 
 		// message, default, and choices can be a function
-		if (isFunction(q.message)) { q.message = q.message(answers); }
-		if (isFunction(q.default)) { q.default = q.default(answers); }
-		if (isFunction(q.choices)) { q.choices = q.choices(answers); }
+		if (isFunction(q.message)) {
+			q.message = q.message(answers);
+		}
+		if (isFunction(q.default)) {
+			q.default = q.default(answers);
+		}
+		if (isFunction(q.choices)) {
+			q.choices = q.choices(answers);
+		}
 
 		// send question over socket
 		client.write(JSON.stringify({
@@ -174,7 +184,7 @@ function bundleQuestions(client, questions, callback) {
 	// create question bundles
 	questions.forEach(function (q, index) {
 		if (isFunction(q.when) || isFunction(q.message) || isFunction(q.default) || isFunction(q.choices) || index === 0) {
-			bundles[bundles.length] = [q];
+			bundles[bundles.length] = [ q ];
 		} else {
 			bundles[bundles.length - 1].push(q);
 		}
@@ -185,18 +195,28 @@ function bundleQuestions(client, questions, callback) {
 		var reqBundle = [];
 		bundle.forEach(function (q) {
 			// when
-			if (isFunction(q.when) && !q.when(answers)) { return; }
+			if (isFunction(q.when) && !q.when(answers)) {
+				return;
+			}
 
 			// message, default, and choices can be a function
-			if (isFunction(q.message)) { q.message = q.message(answers); }
-			if (isFunction(q.default)) { q.default = q.default(answers); }
-			if (isFunction(q.choices)) { q.choices = q.choices(answers); }
+			if (isFunction(q.message)) {
+				q.message = q.message(answers);
+			}
+			if (isFunction(q.default)) {
+				q.default = q.default(answers);
+			}
+			if (isFunction(q.choices)) {
+				q.choices = q.choices(answers);
+			}
 
 			reqBundle.push(q);
 		});
 
 		// nothing to ask
-		if (reqBundle.length === 0) { return done(); }
+		if (reqBundle.length === 0) {
+			return done();
+		}
 
 		// send question over socket
 		client.write(JSON.stringify({
@@ -270,7 +290,9 @@ function bundleQuestions(client, questions, callback) {
 function find(array, key, value) {
 	for (var i = 0; i < array.length; i++) {
 		var item = array[i];
-		if (item[key] === value) { return item; }
+		if (item[key] === value) {
+			return item;
+		}
 	}
 	return null;
 }

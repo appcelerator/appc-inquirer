@@ -4,3 +4,4 @@ coverage
 cover
 build.log
 junit_report.xml
+retirejs.output.json

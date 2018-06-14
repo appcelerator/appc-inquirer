@@ -1,4 +1,4 @@
-module.exports = function(grunt) {
+module.exports = function (grunt) {
 
 	// Project configuration.
 	grunt.initConfig({
@@ -14,7 +14,7 @@ module.exports = function(grunt) {
 						lines: 80
 					},
 					reporter: 'mocha-jenkins-reporter',
-					reportFormats: ['lcov', 'cobertura']
+					reportFormats: [ 'lcov', 'cobertura' ]
 				}
 			}
 		},
@@ -22,7 +22,7 @@ module.exports = function(grunt) {
 			options: {
 				force: false
 			},
-			src: ['appc-inquirer.js', 'test/**/*.js']
+			src: [ 'appc-inquirer.js', 'test/**/*.js' ]
 		}
 	});
 
@@ -31,6 +31,6 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-mocha-istanbul');
 
 	// register tasks
-	grunt.registerTask('default', ['appcJs', 'mocha_istanbul:coverage']);
+	grunt.registerTask('default', [ 'appcJs', 'mocha_istanbul:coverage' ]);
 
 };
