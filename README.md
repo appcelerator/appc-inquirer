@@ -5,7 +5,7 @@
 [![Build Status](https://travis-ci.org/appcelerator/appc-inquirer.svg?branch=master)](https://travis-ci.org/appcelerator/appc-inquirer)
 [![Dependency Status](https://david-dm.org/appcelerator/appc-inquirer.svg)](https://david-dm.org/appcelerator/appc-inquirer)
 [![devDependency Status](https://david-dm.org/appcelerator/appc-inquirer/dev-status.svg)](https://david-dm.org/appcelerator/appc-inquirer#info=devDependencies)
-[![npm version](https://badge.fury.io/js/appc-inquirer.svg)](http://badge.fury.io/js/appc-inquirer)
+[![npm version](https://badge.fury.io/js/appc-inquirer.svg)](http://badge.fury.io/js/appc-inquirer) [![Greenkeeper badge](https://badges.greenkeeper.io/appcelerator/appc-inquirer.svg)](https://greenkeeper.io/)
 ## overview
 
 `appc-inquirer` aims to provide an identical API for interactive prompting that works for both CLI input and data delivered via socket.
