@@ -140,7 +140,6 @@ SocketPrompt.prototype.sendMessage = function (opts, callback) {
  * [singleQuestions description]
  * @param  {net.Socket}   client    [description]
  * @param  {Array}   questions [description]
- * @param  {Object}   context [description]
  * @param  {Function} callback  [description]
  */
 function singleQuestions(client, questions, callback) {
@@ -213,7 +212,6 @@ function singleQuestions(client, questions, callback) {
  * [bundleQuestions description]
  * @param  {net.Socket}   client    [description]
  * @param  {Array}   questions [description]
- * @param  {Object}   context [description]
  * @param  {Function} callback  [description]
  */
 function bundleQuestions(client, questions, callback) {
