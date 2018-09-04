@@ -365,7 +365,7 @@ describe('appc-inquirer', function () {
 			});
 		});
 		server.listen(DEFAULT_PORT, function () {
-			inquirer.prompt(BASIC, { socket:true }, function (err, answers) {
+			inquirer.prompt(BASIC, { socket: true }, function (err, answers) {
 				should.exist(err);
 				return done();
 			});
@@ -403,7 +403,7 @@ describe('appc-inquirer', function () {
 			});
 		});
 		server.listen(DEFAULT_PORT, function () {
-			inquirer.prompt(BASIC, { socket:true, bundle:true }, function (err, answers) {
+			inquirer.prompt(BASIC, { socket: true, bundle: true }, function (err, answers) {
 				should.exist(err);
 				return done();
 			});
@@ -445,7 +445,7 @@ describe('appc-inquirer', function () {
 			});
 		});
 		server.listen(DEFAULT_PORT, function () {
-			inquirer.prompt(question, { socket:true }, function (err, answers) {
+			inquirer.prompt(question, { socket: true }, function (err, answers) {
 				should.exist(err);
 				return done();
 			});
@@ -489,7 +489,7 @@ describe('appc-inquirer', function () {
 			});
 		});
 		server.listen(DEFAULT_PORT, function () {
-			inquirer.prompt(question, { socket:true, bundle:true }, function (err, answers) {
+			inquirer.prompt(question, { socket: true, bundle: true }, function (err, answers) {
 				should.exist(err);
 				return done();
 			});
@@ -590,7 +590,7 @@ describe('appc-inquirer', function () {
 		});
 
 		server.listen(9374, function () {
-			inquirer.prompt(questions, { socket:true, port:9374 }, function (err, answers) {
+			inquirer.prompt(questions, { socket: true, port: 9374 }, function (err, answers) {
 				should.exist(err);
 				server.close();
 				return done();
@@ -699,7 +699,7 @@ describe('appc-inquirer', function () {
 		});
 
 		server.listen(9374, function () {
-			inquirer.prompt(questions, { socket:true, port:9374, bundle:true }, function (err, answers) {
+			inquirer.prompt(questions, { socket: true, port: 9374, bundle: true }, function (err, answers) {
 				should.exist(err);
 				server.close();
 				return done();
