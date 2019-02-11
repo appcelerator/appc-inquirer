@@ -8,7 +8,8 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "JUNIT_REPORT_PATH=junit_report.xml grunt"
+    "lint": "eslint .",
+    "test": "JUNIT_REPORT_PATH=junit_report.xml nyc mocha test/*_test.js --reporter=mocha-jenkins-reporter"
   },
   "bugs": {
     "url": "https://jira.appcelerator.org/browse/CLI"
@@ -30,17 +31,16 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/appcelerator/appc-inquirer",
   "devDependencies": {
-    "grunt": "^1.0.1",
-    "grunt-appc-js": "^2.1.0",
-    "grunt-mocha-istanbul": "^5.0.2",
-    "istanbul": "^0.4.1",
-    "lodash": "^4.17.0",
+    "eslint": "^5.13.0",
+    "eslint-config-axway": "^4.2.1",
+    "lodash": "^4.17.11",
     "mocha": "^5.2.0",
-    "mocha-jenkins-reporter": "^0.3.7",
-    "should": "^13.2.1"
+    "mocha-jenkins-reporter": "^0.4.1",
+    "nyc": "^13.2.0",
+    "should": "^13.2.3"
   },
   "dependencies": {
-    "async": "^2.1.2",
-    "inquirer": "^6.0.0"
+    "async": "^2.6.1",
+    "inquirer": "^6.2.2"
   }
 }
