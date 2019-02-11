@@ -1,6 +1,6 @@
 {
   "name": "appc-inquirer",
-  "version": "0.1.10",
+  "version": "1.0.0",
   "description": "node.js prompt module for asking the same questions different ways",
   "main": "appc-inquirer.js",
   "files": [
