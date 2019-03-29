@@ -31,16 +31,17 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/appcelerator/appc-inquirer",
   "devDependencies": {
-    "eslint": "^5.13.0",
-    "eslint-config-axway": "^4.2.1",
+    "eslint": "^5.15.3",
+    "eslint-config-axway": "^4.2.2",
+    "eslint-plugin-mocha": "^5.3.0",
     "lodash": "^4.17.11",
-    "mocha": "^5.2.0",
+    "mocha": "^6.0.2",
     "mocha-jenkins-reporter": "^0.4.1",
-    "nyc": "^13.2.0",
+    "nyc": "^13.3.0",
     "should": "^13.2.3"
   },
   "dependencies": {
-    "async": "^2.6.1",
+    "async": "^2.6.2",
     "inquirer": "^6.2.2"
   }
 }
