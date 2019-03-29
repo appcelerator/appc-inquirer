@@ -5,3 +5,5 @@ cover
 build.log
 junit_report.xml
 retirejs.output.json
+.DS_Store
+.nyc_output
