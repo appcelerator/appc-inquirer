@@ -32,7 +32,7 @@
   "homepage": "https://github.com/appcelerator/appc-inquirer",
   "devDependencies": {
     "eslint": "^5.15.3",
-    "eslint-config-axway": "^4.2.2",
+    "eslint-config-axway": "^4.5.0",
     "eslint-plugin-mocha": "^5.3.0",
     "lodash": "^4.17.11",
     "mocha": "^6.0.2",
