@@ -73,7 +73,7 @@ describe('appc-inquirer', function () {
 			port: DEFAULT_PORT,
 			type: 'error',
 			code: 'ERROR_CODE',
-			message: 'test message'
+			msg: 'test message'
 		};
 
 		var server = net.createServer(function (c) {
@@ -359,7 +359,7 @@ describe('appc-inquirer', function () {
 					}).should.not.throw();
 					data.should.be.an.Object;
 					data.type.should.equal('error');
-					data.code.should.equal('parse error');
+					data.code.should.equal('ERROR_PARSE');
 					data.message.should.match(/parse error/);
 				});
 			});
@@ -576,7 +576,7 @@ describe('appc-inquirer', function () {
 							}).should.not.throw();
 							data.type.should.equal('error');
 							data.message.should.match(/failed!!!/);
-							data.question.should.have.properties(_.omit(questions[3], OMIT_PROPS));
+							// data.question.should.have.properties(_.omit(questions[3], OMIT_PROPS));
 							c.write(JSON.stringify(val));
 						});
 						break;
@@ -682,9 +682,6 @@ describe('appc-inquirer', function () {
 							}).should.not.throw();
 							data.type.should.equal('error');
 							data.message.should.match(/failed!!!/);
-							data.question[0].should.have.properties(_.omit(questions[2], OMIT_PROPS));
-							data.question[1].should.have.properties(_.omit(questions[3], OMIT_PROPS));
-							data.question[2].should.have.properties(_.omit(questions[4], OMIT_PROPS));
 							c.write(JSON.stringify({
 								q3: [ 'v1', 'v3' ],
 								q4: val,
